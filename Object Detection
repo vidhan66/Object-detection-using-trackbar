@@ -1,0 +1,43 @@
+import cv2
+# Initialize video capture
+cam = cv2.VideoCapture(0)
+ret, frame1 = cam.read()
+frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+# Create tracker objects (one per bounding box)
+tracker = []  # List to store trackers
+# Initialize bounding box coordinates
+bboxes = []
+while True:
+    if len(bboxes) == 0:
+        for j in range(0, 2):
+            # Use the first frame to select the object to track
+            bbox = cv2.selectROI("Select Object to Track", frame1, fromCenter=False, showCrosshair=True)
+            bboxes.append(bbox)
+        # Initialize trackers for each bounding box
+        for box in bboxes:
+            tracker.append(cv2.TrackerMIL_create())
+            tracker[-1].init(frame1, box)  # Initialize tracker with current box
+    # Read a new frame
+    ret, frame2 = cam.read()
+    if not ret:
+        break
+    gray2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+    if len(bboxes) != 0:
+
+            # Update trackers and bounding boxes for each object
+            for i, box in enumerate(bboxes):
+                success, bboxes[i] = tracker[i].update(frame2)
+                if success:
+                    x, y, w, h = [int(v) for v in box]
+                    cv2.rectangle(frame2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.putText(frame2, f"Object {i+1}", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
+    # Display the frame
+    cv2.imshow('Camera', frame2)
+    # Update the previous frame
+    frame1 = gray2
+    # Exit on 'q' keypress
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+# Release the camera and close windows
+cam.release()
+cv2.destroyAllWindows()
