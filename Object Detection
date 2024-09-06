@@ -7,9 +7,10 @@ frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
 tracker = []  # List to store trackers
 # Initialize bounding box coordinates
 bboxes = []
+n= int(input("Enter the number of objects you want to detect\n"))
 while True:
     if len(bboxes) == 0:
-        for j in range(0, 2):
+        for j in range(0, n):
             # Use the first frame to select the object to track
             bbox = cv2.selectROI("Select Object to Track", frame1, fromCenter=False, showCrosshair=True)
             bboxes.append(bbox)
